@@ -1,0 +1,1200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ridge — Personalize</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Manrope:wght@300;400;500;600;700;800&family=Alex+Brush&family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cinzel:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --canvas:#EDEAE4;
+  --panel:#FFFFFF;
+  --surf:#F6F3EF;
+  --surf2:#EFEBE6;
+  --bdr:#E5E0D9;
+  --bdr2:#D4CEC6;
+  --accent:#B8872E;
+  --accent-d:rgba(184,135,46,0.11);
+  --accent-b:rgba(184,135,46,0.22);
+  --danger:#B83232;
+  --success:#2A7A4A;
+  --ink:#1A1612;
+  --ink2:#5A534C;
+  --ink3:#9E9890;
+  --r:6px;--rm:10px;--rl:14px;
+  --ease:cubic-bezier(0.4,0,0.2,1);
+  --spring:cubic-bezier(0.34,1.56,0.64,1);
+}
+html,body{height:100%;font-family:'Manrope',sans-serif;background:var(--canvas);color:var(--ink);overflow:hidden;}
+.app{display:flex;flex-direction:column;height:100vh;}
+
+/* ─── TOPBAR ─── */
+.topbar{height:50px;background:var(--panel);border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;padding:0 22px;flex-shrink:0;position:relative;z-index:20;}
+.tb-left{display:flex;align-items:center;gap:12px;}
+.tb-back{width:30px;height:30px;border:1px solid var(--bdr);border-radius:var(--r);background:none;color:var(--ink2);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.tb-back:hover{border-color:var(--ink2);color:var(--ink);}
+.tb-brand{font-family:'Bebas Neue',sans-serif;font-size:17px;letter-spacing:0.14em;color:var(--ink);}
+.kit-chip{display:flex;align-items:center;gap:5px;background:var(--surf);border:1px solid var(--bdr);border-radius:20px;padding:3px 10px 3px 7px;font-size:9px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--ink2);}
+.kit-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+
+/* breadcrumb */
+.breadcrumb{position:absolute;left:50%;transform:translateX(-50%);display:flex;align-items:center;}
+.bc-step{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;cursor:pointer;transition:background .15s;}
+.bc-step:hover{background:var(--surf);}
+.bc-num{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--ink3);transition:all .2s;}
+.bc-num.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.bc-num.dn{background:var(--ink);border-color:var(--ink);color:#fff;}
+.bc-label{font-size:9px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--ink3);transition:color .2s;}
+.bc-label.on{color:var(--ink);}
+.bc-sep{width:18px;height:0.5px;background:var(--bdr);}
+.tb-reset{display:flex;align-items:center;gap:6px;border:1px solid var(--bdr);background:none;color:var(--ink2);font-family:'Manrope',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;padding:6px 12px;border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.tb-reset:hover{border-color:var(--danger);color:var(--danger);}
+
+/* ─── NOTICE ─── */
+.notice{display:flex;align-items:center;justify-content:center;gap:8px;padding:7px 22px;background:rgba(184,135,46,0.07);border-bottom:1px solid rgba(184,135,46,0.18);flex-shrink:0;}
+.notice p{font-size:11px;color:var(--ink2);}
+.notice strong{color:var(--accent);font-weight:700;}
+
+/* ─── MAIN ─── */
+.main{display:flex;flex:1;overflow:hidden;}
+
+/* ─── CANVAS ─── */
+.canvas-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;overflow:hidden;background:var(--canvas);}
+.edit-chip{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.92);backdrop-filter:blur(6px);border:1px solid var(--bdr);border-radius:20px;padding:5px 13px;margin-bottom:18px;font-size:9px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--ink2);transition:opacity .25s,transform .25s;}
+.edit-chip.hide{opacity:0;pointer-events:none;transform:translateY(-4px);}
+.edit-chip-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);}
+.preview-wrap{display:flex;flex-direction:column;align-items:center;}
+.item-preview{display:none;}
+.item-preview.on{display:block;}
+.vtog{display:flex;gap:5px;margin-top:18px;}
+.vt{padding:5px 16px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;border:1.5px solid transparent;transition:all .15s;}
+.vt.on{background:var(--ink);color:#fff;}
+.vt:not(.on){background:none;color:var(--ink3);border-color:var(--bdr);}
+.vt:hover:not(.on){border-color:var(--ink2);color:var(--ink2);}
+.inspo{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.92);backdrop-filter:blur(8px);border:1px solid var(--bdr);border-radius:20px;padding:8px 16px;cursor:pointer;transition:border-color .15s;white-space:nowrap;}
+.inspo:hover{border-color:var(--accent);}
+.inspo span{font-size:10px;color:var(--ink2);}
+.inspo a{font-size:10px;color:var(--accent);font-weight:700;text-decoration:none;}
+
+/* ─── CONFIG PANEL ─── */
+.config-panel{width:340px;background:var(--panel);border-left:1px solid var(--bdr);display:flex;flex-direction:column;overflow:hidden;flex-shrink:0;}
+
+/* wizard step indicator strip */
+.wiz-strip{display:flex;align-items:center;padding:12px 20px;border-bottom:1px solid var(--bdr);background:var(--surf);flex-shrink:0;gap:0;}
+.ws-step{display:flex;align-items:center;gap:6px;flex:1;}
+.ws-step:last-child{flex:0 0 auto;}
+.ws-num{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--bdr2);display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:var(--ink3);flex-shrink:0;transition:all .2s;}
+.ws-num.on{background:var(--accent);border-color:var(--accent);color:#fff;}
+.ws-num.dn{background:var(--ink);border-color:var(--ink);color:#fff;}
+.ws-label{font-size:9px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink3);transition:color .2s;white-space:nowrap;}
+.ws-label.on{color:var(--ink);}
+.ws-bar{flex:1;height:1.5px;background:var(--bdr);margin:0 6px;transition:background .3s;}
+.ws-bar.filled{background:var(--accent);}
+
+/* wizard content area */
+.wiz-body{flex:1;overflow:hidden;position:relative;}
+.wiz-page{position:absolute;inset:0;overflow-y:auto;padding:18px 20px 14px;display:flex;flex-direction:column;gap:16px;opacity:0;pointer-events:none;transform:translateX(20px);transition:opacity .22s var(--ease),transform .22s var(--ease);}
+.wiz-page.on{opacity:1;pointer-events:all;transform:translateX(0);}
+.wiz-page.exit-left{transform:translateX(-20px);}
+.wiz-page::-webkit-scrollbar{width:3px;}
+.wiz-page::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+
+.wiz-page-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.07em;color:var(--ink);line-height:1;}
+.wiz-page-sub{font-size:12px;color:var(--ink2);line-height:1.6;margin-top:2px;}
+
+/* nav buttons inside wizard pages */
+.wiz-nav{display:flex;gap:8px;margin-top:4px;padding-top:4px;}
+.wiz-next{flex:1;padding:11px;background:var(--ink);border:none;border-radius:var(--rm);font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:#fff;cursor:pointer;transition:opacity .15s;}
+.wiz-next:hover{opacity:.85;}
+.wiz-next.acc{background:var(--accent);}
+.wiz-next:disabled{opacity:0.35;cursor:not-allowed;}
+.wiz-back-btn{padding:11px 14px;border:1.5px solid var(--bdr);background:none;color:var(--ink2);font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;border-radius:var(--rm);cursor:pointer;transition:all .15s;}
+.wiz-back-btn:hover{border-color:var(--ink2);color:var(--ink);}
+
+/* ─── section label ─── */
+.sl{font-size:9px;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink3);display:block;margin-bottom:8px;}
+.sl-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.sl-note{font-size:10px;color:var(--ink3);}
+.divider{height:1px;background:var(--bdr);}
+
+/* ─── KIT CARDS (full) ─── */
+.kit-cards{display:flex;flex-direction:column;gap:8px;}
+.kit-card{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:13px 14px;cursor:pointer;transition:all .18s var(--ease);display:flex;align-items:flex-start;justify-content:space-between;gap:10px;background:none;position:relative;}
+.kit-card:hover{border-color:var(--bdr2);}
+.kit-card.on{border-color:var(--accent);background:var(--accent-d);}
+.kit-pop{position:absolute;top:-1px;right:10px;background:var(--accent);color:#fff;font-size:7px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;padding:2px 7px;border-radius:0 0 6px 6px;}
+.kit-name{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px;}
+.kit-card.on .kit-name{color:var(--accent);}
+.kit-includes{display:flex;flex-direction:column;gap:3px;}
+.kit-item-row{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--ink2);}
+.k-dot{width:4px;height:4px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.k-tag{margin-left:auto;font-size:7.5px;font-weight:800;letter-spacing:0.05em;text-transform:uppercase;color:var(--accent);background:var(--accent-d);padding:1.5px 5px;border-radius:3px;white-space:nowrap;}
+.kit-right{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex-shrink:0;}
+.kit-price{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;color:var(--ink);}
+.kit-card.on .kit-price{color:var(--accent);}
+.kit-save{font-size:9px;font-weight:700;color:var(--success);}
+.kit-fee{font-size:8px;color:var(--ink3);text-align:right;line-height:1.4;}
+
+/* ─── COLOR ─── */
+.swatch-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.sw{width:24px;height:24px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .15s;flex-shrink:0;}
+.sw:hover{transform:scale(1.14);}
+.sw.on{box-shadow:0 0 0 2px var(--panel),0 0 0 4px var(--accent);}
+
+/* ─── ITEM CARDS (step 2) ─── */
+.item-cards{display:flex;flex-direction:column;gap:7px;}
+.item-card{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:all .15s;background:none;}
+.item-card:hover{border-color:var(--bdr2);}
+.item-card.on{border-color:var(--accent);background:var(--accent-d);}
+.ic-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--bdr2);flex-shrink:0;transition:all .15s;}
+.item-card.on .ic-dot{background:var(--accent);border-color:var(--accent);}
+.ic-name{font-size:13px;font-weight:700;color:var(--ink);flex:1;}
+.item-card.on .ic-name{color:var(--accent);}
+.ic-tag{font-size:8px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-d);padding:2px 6px;border-radius:3px;}
+.ic-check{display:none;width:16px;height:16px;border-radius:50%;background:var(--success);align-items:center;justify-content:center;flex-shrink:0;}
+.ic-check.vis{display:flex;}
+.ic-status{font-size:9px;color:var(--ink3);margin-top:2px;}
+.ic-status.done{color:var(--success);font-weight:600;}
+
+/* skip engraving link */
+/* ─── INLINE ITEM ACCORDION (step 2 for kits) ─── */
+.item-acc{border:1.5px solid var(--bdr);border-radius:var(--rm);overflow:hidden;margin-bottom:8px;}
+.item-acc:last-child{margin-bottom:0;}
+.item-acc-hd{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;background:var(--surf);transition:background .15s;user-select:none;}
+.item-acc-hd:hover{background:var(--surf2);}
+.item-acc.open .item-acc-hd{background:var(--surf2);border-bottom:1px solid var(--bdr);}
+.item-acc.has-engrave{border-color:var(--success);}
+.item-acc.has-engrave .item-acc-hd{background:#f0faf4;}
+.item-acc-dot{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--bdr2);flex-shrink:0;transition:all .15s;}
+.item-acc.open .item-acc-dot{background:var(--accent);border-color:var(--accent);}
+.item-acc.has-engrave .item-acc-dot{background:var(--success);border-color:var(--success);}
+.item-acc-info{flex:1;}
+.item-acc-name{font-size:13px;font-weight:700;color:var(--ink);}
+.item-acc.has-engrave .item-acc-name{color:var(--success);}
+.item-acc-status{font-size:10px;color:var(--ink3);margin-top:1px;}
+.item-acc-status.done{color:var(--success);font-weight:600;}
+.item-acc-tag{font-size:8px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--accent);background:var(--accent-d);padding:2px 6px;border-radius:3px;flex-shrink:0;}
+.item-acc-chev{font-size:9px;color:var(--ink3);transition:transform .2s var(--ease);}
+.item-acc.open .item-acc-chev{transform:rotate(180deg);}
+.item-acc-body{max-height:0;overflow:hidden;transition:max-height .3s var(--ease);}
+.item-acc.open .item-acc-body{max-height:1400px;}
+.item-acc-inner{padding:14px;display:flex;flex-direction:column;gap:14px;}
+.item-skip{font-size:10px;color:var(--ink3);cursor:pointer;transition:color .15s;text-align:center;padding:2px 0;}
+.item-skip:hover{color:var(--accent);}
+
+.skip-link{text-align:center;font-size:10px;color:var(--ink3);cursor:pointer;transition:color .15s;padding:2px 0;}
+.skip-link:hover{color:var(--accent);}
+
+/* ─── DECORATION (step 3) ─── */
+.deco-note{font-size:11px;color:var(--ink3);line-height:1.5;}
+.deco-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;}
+.deco-card{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:13px 6px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;transition:all .15s;background:none;}
+.deco-card:hover{border-color:var(--bdr2);}
+.deco-card.on{border-color:var(--accent);background:var(--accent-d);}
+.deco-icon{color:var(--ink3);transition:color .15s;}
+.deco-card.on .deco-icon{color:var(--accent);}
+.deco-lbl{font-size:9px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink3);}
+.deco-card.on .deco-lbl{color:var(--accent);}
+
+/* text input */
+.tx{width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px 13px;color:var(--ink);font-family:'Manrope',sans-serif;font-size:14px;font-weight:500;letter-spacing:0.04em;outline:none;transition:border-color .15s;}
+.tx:focus{border-color:var(--accent);}
+.tx::placeholder{color:var(--ink3);}
+.ctr-row{display:flex;justify-content:space-between;margin-top:5px;}
+.ctr{font-size:10px;color:var(--ink3);}
+.ctr.warn{color:var(--accent);}
+.ctr.max{color:var(--danger);}
+.laser-tag{font-size:10px;color:var(--ink3);}
+.item-note{font-size:11px;color:var(--ink3);background:var(--surf);border-radius:var(--r);padding:10px 12px;line-height:1.6;}
+
+/* placement */
+.pl-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.pl-card{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:7px;transition:all .15s;background:none;}
+.pl-card:hover{border-color:var(--bdr2);}
+.pl-card.on{border-color:var(--accent);background:var(--accent-d);}
+.pl-lbl{font-size:8px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink2);}
+.mini-w{width:76px;height:48px;}
+
+/* font list */
+.font-list{display:flex;flex-direction:column;gap:5px;}
+.font-item{display:flex;align-items:center;justify-content:space-between;padding:9px 11px;border:1.5px solid var(--bdr);border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.font-item:hover{border-color:var(--bdr2);}
+.font-item.on{border-color:var(--accent);background:var(--accent-d);}
+.font-samp{font-size:17px;color:var(--ink);}
+.font-tag{font-size:8px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink3);}
+.font-item.on .font-tag{color:var(--accent);}
+
+/* monogram */
+.mono-row{display:flex;gap:7px;}
+.mono-col{flex:1;display:flex;flex-direction:column;gap:3px;}
+.mono-lbl{font-size:9px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;color:var(--ink3);}
+.mono-in{width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px;color:var(--ink);font-size:18px;font-weight:700;text-align:center;text-transform:uppercase;font-family:'Manrope',sans-serif;outline:none;transition:border-color .15s;}
+.mono-in:focus{border-color:var(--accent);}
+
+/* icon grid */
+.icon-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;}
+.icon-card{aspect-ratio:1;border:1.5px solid var(--bdr);border-radius:var(--rm);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:all .15s;background:none;}
+.icon-card:hover{border-color:var(--bdr2);}
+.icon-card.on{border-color:var(--accent);background:var(--accent-d);}
+.icon-g{font-size:20px;}
+.icon-n{font-size:7px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink3);text-align:center;}
+.icon-card.on .icon-n{color:var(--accent);}
+
+/* another-item prompt */
+.another-item-row{display:flex;flex-direction:column;gap:7px;}
+.another-btn{padding:10px;border:1.5px solid var(--bdr);border-radius:var(--rm);background:none;font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink2);cursor:pointer;transition:all .15s;text-align:center;}
+.another-btn:hover{border-color:var(--accent);color:var(--accent);}
+.another-btn.done-item{border-color:var(--success);color:var(--success);background:rgba(42,122,74,0.07);cursor:default;}
+
+/* bulk tiles */
+.bulk-tiles{display:flex;flex-direction:column;gap:7px;}
+.bulk-tile{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:12px 13px;display:flex;align-items:flex-start;gap:10px;}
+.btile-icon{font-size:18px;flex-shrink:0;}
+.btile-h{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px;}
+.btile-p{font-size:10px;color:var(--ink3);line-height:1.5;}
+.bulk-cta{width:100%;padding:12px;background:var(--accent);border:none;border-radius:var(--rm);font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:0.1em;color:#fff;cursor:pointer;transition:opacity .15s;}
+.bulk-cta:hover{opacity:.88;}
+
+/* ─── REVIEW VIEW ─── */
+.review-view{flex:1;overflow-y:auto;padding:18px 20px;display:flex;flex-direction:column;gap:14px;}
+.review-view::-webkit-scrollbar{width:3px;}
+.review-view::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:2px;}
+.rv-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px 12px;border-bottom:1px solid var(--bdr);flex-shrink:0;}
+.rv-title{font-family:'Bebas Neue',sans-serif;font-size:19px;letter-spacing:0.08em;}
+.final-badge{display:flex;align-items:center;gap:4px;background:rgba(184,50,50,0.09);border:1px solid rgba(184,50,50,0.2);color:var(--danger);font-size:8px;font-weight:800;padding:3px 8px;border-radius:var(--r);letter-spacing:0.07em;text-transform:uppercase;}
+.r-kit-label{font-size:8px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);padding-bottom:8px;display:block;}
+.r-line{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:5px 0;}
+.r-name{font-size:13px;font-weight:600;color:var(--ink);}
+.r-sub{font-size:11px;color:var(--ink3);margin-top:1px;}
+.r-price{font-size:13px;font-weight:600;color:var(--ink);white-space:nowrap;}
+.r-price.add{color:var(--accent);}
+.r-price.none{color:var(--ink3);font-size:11px;font-weight:400;}
+.r-total-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0 4px;}
+.r-total-lbl{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:0.1em;}
+.r-total-val{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:0.04em;color:var(--accent);}
+.qty-row{display:flex;align-items:center;justify-content:space-between;}
+.qty-ctrl{display:flex;align-items:center;gap:10px;}
+.qty-btn{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--bdr);background:none;color:var(--ink);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.qty-btn:hover{border-color:var(--ink2);}
+.qty-n{font-size:15px;font-weight:700;min-width:22px;text-align:center;}
+.gift-box{border:1.5px solid var(--bdr);border-radius:var(--rm);padding:13px;display:flex;flex-direction:column;gap:10px;}
+.gift-tog-row{display:flex;align-items:center;justify-content:space-between;}
+.gift-lbl{font-size:12px;font-weight:700;color:var(--ink);}
+.gift-sub{font-size:10px;color:var(--ink3);}
+.tog-pill{width:34px;height:18px;border-radius:9px;background:var(--bdr2);position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;border:none;}
+.tog-pill.on{background:var(--accent);}
+.tog-pill::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .18s var(--spring);box-shadow:0 1px 3px rgba(0,0,0,0.2);}
+.tog-pill.on::after{transform:translateX(16px);}
+.gift-msg{display:none;width:100%;background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);padding:9px 11px;color:var(--ink);font-family:'Manrope',sans-serif;font-size:12px;resize:none;outline:none;transition:border-color .15s;height:68px;}
+.gift-msg:focus{border-color:var(--accent);}
+.gift-msg.vis{display:block;}
+.share-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.share-btn{display:flex;align-items:center;justify-content:center;gap:6px;border:1.5px solid var(--bdr);border-radius:var(--rm);padding:9px;background:none;color:var(--ink2);font-family:'Manrope',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;}
+.share-btn:hover{border-color:var(--ink2);color:var(--ink);}
+
+/* ─── BOTTOM BAR ─── */
+.bar{height:54px;background:var(--panel);border-top:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:16px;flex-shrink:0;}
+.bar-pr{display:flex;flex-direction:column;}
+.bar-pl{font-size:7px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink3);}
+.bar-pv{font-size:16px;font-weight:700;color:var(--ink);line-height:1.1;}
+.bar-pv.acc{color:var(--accent);}
+.bar-ps{font-size:8px;color:var(--ink3);}
+.bar-dv{width:0.5px;height:24px;background:var(--bdr);}
+.bar-sp{flex:1;}
+.save-btn{display:flex;align-items:center;gap:6px;border:1.5px solid var(--bdr);background:none;color:var(--ink2);font-family:'Manrope',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;padding:7px 13px;border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.save-btn:hover{border-color:var(--ink2);color:var(--ink);}
+.rev-btn{display:flex;align-items:center;gap:7px;background:var(--ink);border:none;color:#fff;font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;padding:9px 18px;border-radius:var(--r);cursor:pointer;transition:opacity .15s;}
+.rev-btn:hover{opacity:.85;}
+.rev-btn.acc{background:var(--accent);}
+.back-btn{display:flex;align-items:center;gap:6px;border:1.5px solid var(--bdr);background:none;color:var(--ink2);font-family:'Manrope',sans-serif;font-size:9px;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;padding:7px 13px;border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.back-btn:hover{border-color:var(--ink2);color:var(--ink);}
+
+/* ─── PROGRESS MICRO-BAR (wizard) ─── */
+.progress-bar-wrap{height:2px;background:var(--bdr);flex-shrink:0;overflow:hidden;}
+.progress-bar-fill{height:100%;background:var(--accent);transition:width .35s var(--ease);}
+
+/* ─── MODAL ─── */
+.modal-ov{position:fixed;inset:0;background:rgba(100,90,80,0.42);backdrop-filter:blur(6px);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .22s;}
+.modal-ov.open{opacity:1;pointer-events:all;}
+.modal{background:var(--panel);border:1px solid var(--bdr);border-radius:18px;padding:28px;width:336px;transform:scale(0.93) translateY(8px);transition:transform .24s var(--spring);}
+.modal-ov.open .modal{transform:scale(1) translateY(0);}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:0.08em;margin-bottom:7px;}
+.modal-body{font-size:13px;color:var(--ink2);line-height:1.6;margin-bottom:22px;}
+.modal-acts{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+.modal-keep{border:1.5px solid var(--bdr);background:none;color:var(--ink);font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:12px;border-radius:var(--r);cursor:pointer;transition:all .15s;}
+.modal-keep:hover{border-color:var(--ink2);}
+.modal-rst{border:none;background:var(--danger);color:#fff;font-family:'Manrope',sans-serif;font-size:10px;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;padding:12px;border-radius:var(--r);cursor:pointer;transition:opacity .15s;}
+.modal-rst:hover{opacity:.88;}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="tb-left">
+      <button class="tb-back"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M7 1.5L3 5.5L7 9.5" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+      <span class="tb-brand">Ridge</span>
+      <div class="kit-chip"><div class="kit-chip-dot"></div><span id="kit-chip-label">Wallet Only</span></div>
+    </div>
+    <nav class="breadcrumb">
+      <div class="bc-step" onclick="goReview()"><div class="bc-num on" id="bc1">1</div><span class="bc-label on" id="bcl1">Design</span></div>
+      <div class="bc-sep"></div>
+      <div class="bc-step" onclick="goReview()"><div class="bc-num" id="bc2">2</div><span class="bc-label" id="bcl2">Review</span></div>
+      <div class="bc-sep"></div>
+      <div class="bc-step"><div class="bc-num" id="bc3">3</div><span class="bc-label" id="bcl3">Cart</span></div>
+    </nav>
+    <button class="tb-reset" onclick="openModal()"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 5.5A4 4 0 1 1 5.5 9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M1.5 3.5v2h2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg> Start Over</button>
+  </header>
+
+  <!-- NOTICE -->
+  <div class="notice">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="5" stroke="#B8872E" stroke-width="1.2"/><path d="M6 5v3.5" stroke="#B8872E" stroke-width="1.2" stroke-linecap="round"/><circle cx="6" cy="3.8" r=".6" fill="#B8872E"/></svg>
+    <p>What you see is exactly what we'll ship. <strong>Personalized items are final sale.</strong></p>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- Canvas -->
+    <div class="canvas-area">
+      <div class="edit-chip hide" id="edit-chip">
+        <div class="edit-chip-dot"></div>
+        <span id="edit-chip-label">Editing Wallet</span>
+      </div>
+      <div class="preview-wrap">
+        <div>
+          <!-- WALLET -->
+          <div class="item-preview on" id="prev-wallet">
+            <svg width="340" height="214" viewBox="0 0 340 214" fill="none">
+              <defs><g id="sc"><line x1="0" y1="-2.6" x2="0" y2="2.6" stroke="rgba(255,255,255,0.55)" stroke-width="0.85" stroke-linecap="round"/><line x1="2.2" y1="-1.3" x2="-2.2" y2="1.3" stroke="rgba(255,255,255,0.55)" stroke-width="0.85" stroke-linecap="round"/><line x1="2.2" y1="1.3" x2="-2.2" y2="-1.3" stroke="rgba(255,255,255,0.55)" stroke-width="0.85" stroke-linecap="round"/></g></defs>
+              <rect id="w-body" x="30" y="17" width="280" height="180" rx="12" fill="#2A4A8A"/>
+              <path d="M57 197 Q93 178 128 197 Z" fill="#EDEAE4"/>
+              <path d="M57 197 Q93 178 128 197" stroke="rgba(0,0,0,0.16)" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+              <text x="228" y="44" text-anchor="middle" dominant-baseline="middle" font-family="Bebas Neue,sans-serif" font-size="13" fill="rgba(255,255,255,0.28)" letter-spacing="5">RIDGE</text>
+              <circle cx="54"  cy="44"  r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(54,44)"/>
+              <circle cx="170" cy="44"  r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(170,44)"/>
+              <circle cx="286" cy="44"  r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(286,44)"/>
+              <circle cx="54"  cy="173" r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(54,173)"/>
+              <circle cx="131" cy="173" r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(131,173)"/>
+              <circle cx="208" cy="173" r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(208,173)"/>
+              <circle cx="286" cy="173" r="5.5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.2"/><use href="#sc" transform="translate(286,173)"/>
+              <text id="w-engrave-br" x="266" y="163" text-anchor="end" font-family="Alex Brush,cursive" font-size="14" fill="rgba(255,255,255,0.48)" letter-spacing="1.5"></text>
+              <text id="w-engrave-c"  x="170" y="148" text-anchor="middle" font-family="Alex Brush,cursive" font-size="14" fill="rgba(255,255,255,0.48)" letter-spacing="1.5"></text>
+              <text id="w-mono"       x="170" y="148" text-anchor="middle" font-family="Cinzel,serif" font-size="16" fill="rgba(255,255,255,0.48)" letter-spacing="4"></text>
+              <text id="w-icon"       x="100" y="153" text-anchor="middle" font-size="22" fill="rgba(255,255,255,0.48)"></text>
+            </svg>
+          </div>
+          <!-- KEYCASE -->
+          <div class="item-preview" id="prev-keycase">
+            <svg width="220" height="214" viewBox="0 0 220 214" fill="none">
+              <defs><g id="sc-k"><line x1="0" y1="-2.3" x2="0" y2="2.3" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/><line x1="2" y1="-1.15" x2="-2" y2="1.15" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/><line x1="2" y1="1.15" x2="-2" y2="-1.15" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/></g></defs>
+              <rect x="50" y="17" width="120" height="180" rx="16" fill="#3A3A3A"/>
+              <circle cx="110" cy="37" r="12" fill="rgba(0,0,0,0.25)" stroke="rgba(255,255,255,0.18)" stroke-width="1.5"/>
+              <circle cx="110" cy="37" r="7" fill="#EDEAE4"/>
+              <rect x="67" y="68" width="86" height="2.5" rx="1.2" fill="rgba(255,255,255,0.17)"/>
+              <rect x="67" y="84" width="86" height="2.5" rx="1.2" fill="rgba(255,255,255,0.14)"/>
+              <rect x="67" y="100" width="86" height="2.5" rx="1.2" fill="rgba(255,255,255,0.11)"/>
+              <circle cx="67" cy="158" r="5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.1"/><use href="#sc-k" transform="translate(67,158)"/>
+              <circle cx="153" cy="158" r="5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.1"/><use href="#sc-k" transform="translate(153,158)"/>
+              <text id="k-engrave" x="110" y="132" text-anchor="middle" font-family="Alex Brush,cursive" font-size="13" fill="rgba(255,255,255,0.48)" letter-spacing="1.5"></text>
+            </svg>
+          </div>
+          <!-- KNIFE -->
+          <div class="item-preview" id="prev-knife">
+            <svg width="180" height="214" viewBox="0 0 180 214" fill="none">
+              <rect x="73" y="100" width="34" height="94" rx="8" fill="#444"/>
+              <rect x="75" y="106" width="30" height="4" rx="2" fill="rgba(255,255,255,0.14)"/>
+              <rect x="75" y="116" width="30" height="4" rx="2" fill="rgba(255,255,255,0.11)"/>
+              <rect x="75" y="126" width="30" height="4" rx="2" fill="rgba(255,255,255,0.09)"/>
+              <circle cx="90" cy="172" r="5" fill="rgba(255,255,255,0.07)" stroke="rgba(255,255,255,0.22)" stroke-width="1.1"/>
+              <line x1="90" y1="169.5" x2="90" y2="174.5" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/>
+              <line x1="87.8" y1="170.7" x2="92.2" y2="173.3" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/>
+              <line x1="87.8" y1="173.3" x2="92.2" y2="170.7" stroke="rgba(255,255,255,0.55)" stroke-width="0.8" stroke-linecap="round"/>
+              <path d="M83 100 L83 32 Q90 16 97 32 L97 100 Z" fill="#A8A8A8"/>
+              <path d="M83 100 L83 32 Q87 22 90 24 L90 100 Z" fill="#C2C2C2"/>
+              <text id="kn-engrave" x="90" y="74" text-anchor="middle" font-family="Alex Brush,cursive" font-size="11" fill="rgba(80,80,80,0.7)" letter-spacing="1"></text>
+            </svg>
+          </div>
+        </div>
+        <div class="vtog" id="view-toggle">
+          <button class="vt on" onclick="setView('main',this)">Main</button>
+          <button class="vt" onclick="setView('back',this)">Back</button>
+        </div>
+      </div>
+      <div class="inspo"><span>⭐</span><span>Need inspiration?</span><a href="#">See popular designs</a></div>
+    </div>
+
+    <!-- Config panel -->
+    <aside class="config-panel">
+
+      <!-- WIZARD UI -->
+      <div id="wizard-ui" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <!-- step indicator strip -->
+        <div class="wiz-strip" id="wiz-strip">
+          <div class="ws-step"><div class="ws-num on" id="wn1">1</div><span class="ws-label on" id="wl1">Kit</span></div>
+          <div class="ws-bar" id="wb1"></div>
+          <div class="ws-step"><div class="ws-num" id="wn2">2</div><span class="ws-label" id="wl2">Item</span></div>
+          <div class="ws-bar" id="wb2"></div>
+          <div class="ws-step"><div class="ws-num" id="wn3">3</div><span class="ws-label" id="wl3">Engrave</span></div>
+          <div class="ws-bar" id="wb3"></div>
+          <div class="ws-step"><div class="ws-num" id="wn4">4</div><span class="ws-label" id="wl4">Bulk?</span></div>
+        </div>
+        <!-- progress micro-bar -->
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" id="prog-fill" style="width:0%"></div></div>
+
+        <!-- pages container -->
+        <div class="wiz-body">
+
+          <!-- PAGE 1: Kit + Color -->
+          <div class="wiz-page on" id="pg1">
+            <div>
+              <div class="wiz-page-title">What are you buying?</div>
+              <div class="wiz-page-sub">Choose your kit. You can personalize each item next.</div>
+            </div>
+            <div>
+              <span class="sl">Kit</span>
+              <div class="kit-cards">
+                <div class="kit-card on" data-kit="wallet" onclick="pickKit('wallet',this)">
+                  <div><div class="kit-name">Wallet Only</div><div class="kit-includes"><div class="kit-item-row"><span class="k-dot"></span><span>Ridge Wallet</span><span class="k-tag">Text · Mono · Icon</span></div></div></div>
+                  <div class="kit-right"><div class="kit-price">$76</div><div class="kit-fee">+$15 per<br>engraving</div></div>
+                </div>
+                <div class="kit-card" data-kit="driver" onclick="pickKit('driver',this)">
+                  <div class="kit-pop">Most Popular</div>
+                  <div><div class="kit-name">Driver Kit</div><div class="kit-includes"><div class="kit-item-row"><span class="k-dot"></span><span>Wallet</span><span class="k-tag">Text · Mono · Icon</span></div><div class="kit-item-row"><span class="k-dot"></span><span>Keycase</span><span class="k-tag">Text only</span></div></div></div>
+                  <div class="kit-right"><div class="kit-price">$105</div><div class="kit-save">Save $29</div><div class="kit-fee">+$15 per<br>item engraved</div></div>
+                </div>
+                <div class="kit-card" data-kit="survival" onclick="pickKit('survival',this)">
+                  <div><div class="kit-name">Survival Kit</div><div class="kit-includes"><div class="kit-item-row"><span class="k-dot"></span><span>Wallet</span><span class="k-tag">Text · Mono · Icon</span></div><div class="kit-item-row"><span class="k-dot"></span><span>Keycase</span><span class="k-tag">Text only</span></div><div class="kit-item-row"><span class="k-dot"></span><span>Knife</span><span class="k-tag">Text only</span></div></div></div>
+                  <div class="kit-right"><div class="kit-price">$125</div><div class="kit-save">Save $49</div><div class="kit-fee">+$15 per<br>item engraved</div></div>
+                </div>
+              </div>
+            </div>
+            <div class="divider"></div>
+            <div>
+              <div class="sl-row"><span class="sl" style="margin:0">Wallet Color</span><span class="sl-note" id="color-name">Alpine Navy</span></div>
+              <div class="swatch-grid">
+                <div class="sw on" style="background:#2A4A8A" data-color="Alpine Navy" data-hex="#2A4A8A" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#3A3A3A" data-color="Gunmetal" data-hex="#3A3A3A" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#4A5A40" data-color="Olive Drab" data-hex="#4A5A40" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#8B1A2A" data-color="Crimson" data-hex="#8B1A2A" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#B5CC2A" data-color="Volt" data-hex="#B5CC2A" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#1E78D4" data-color="Cobalt" data-hex="#1E78D4" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#D46020" data-color="Burnt Orange" data-hex="#D46020" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#8A62D4" data-color="Lavender" data-hex="#8A62D4" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#3AB8C8" data-color="Teal" data-hex="#3AB8C8" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#D43090" data-color="Hot Pink" data-hex="#D43090" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#D4A020" data-color="Gold" data-hex="#D4A020" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#1E8A3C" data-color="Forest" data-hex="#1E8A3C" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#F0F0F0" data-color="White" data-hex="#F0F0F0" onclick="pickColor(this)"></div>
+                <div class="sw" style="background:#B8C4CC" data-color="Slate" data-hex="#B8C4CC" onclick="pickColor(this)"></div>
+              </div>
+            </div>
+            <div class="wiz-nav">
+              <button class="wiz-next" onclick="goToPage(2)">Choose Kit →</button>
+            </div>
+          </div>
+
+          <!-- PAGE 2: Items with inline engraving -->
+          <div class="wiz-page" id="pg2">
+            <div>
+              <div class="wiz-page-title" id="pg2-title">Personalize your kit</div>
+              <div class="wiz-page-sub">Tap an item to expand engraving options. Leave any blank to skip.</div>
+            </div>
+            <div id="item-accordion-container">
+              <!-- built by JS -->
+            </div>
+            <div class="wiz-nav">
+              <button class="wiz-back-btn" onclick="goToPage(1)">← Back</button>
+              <button class="wiz-next" onclick="goToPage(4)">Continue →</button>
+            </div>
+          </div>
+
+          <!-- PAGE 3: Engrave (solo wallet only) -->
+          <div class="wiz-page" id="pg3">
+            <div>
+              <div class="wiz-page-title" id="pg3-title">Engrave your Wallet</div>
+              <div class="wiz-page-sub">Choose a decoration type — adds +$15</div>
+            </div>
+            <div id="pg3-content">
+              <!-- built by JS for wallet-only flow -->
+            </div>
+            <div class="wiz-nav" id="pg3-nav">
+              <button class="wiz-back-btn" onclick="backFromEngraving()">← Back</button>
+              <button class="wiz-next" id="pg3-next" onclick="afterEngraving()">Done →</button>
+            </div>
+          </div>
+
+          <!-- PAGE 4: Bulk? -->
+          <div class="wiz-page" id="pg4">
+            <div>
+              <div class="wiz-page-title">Buying in bulk?</div>
+              <div class="wiz-page-sub">20+ units? We offer volume pricing and per-unit customization.</div>
+            </div>
+            <div class="bulk-tiles">
+              <div class="bulk-tile"><span class="btile-icon">🎁</span><div><div class="btile-h">Teams &amp; Gifts</div><div class="btile-p">Corporate gifting, client appreciation, team milestones.</div></div></div>
+              <div class="bulk-tile"><span class="btile-icon">✏️</span><div><div class="btile-h">Per-Unit Customization</div><div class="btile-p">Each item carries a different name or monogram.</div></div></div>
+              <div class="bulk-tile"><span class="btile-icon">📦</span><div><div class="btile-h">20+ Unit Minimum</div><div class="btile-p">Volume pricing available. Contact us for a quote.</div></div></div>
+            </div>
+            <button class="bulk-cta" onclick="alert('Connecting to bulk team…')">Enable Bulk Ordering →</button>
+            <div class="wiz-nav">
+              <button class="wiz-back-btn" onclick="backFromBulk()">← Back</button>
+              <button class="wiz-next acc" onclick="goReview()">Review Design →</button>
+            </div>
+          </div>
+
+        </div><!-- /wiz-body -->
+      </div><!-- /wizard-ui -->
+
+      <!-- REVIEW UI -->
+      <div id="review-ui" class="hidden" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+        <div class="rv-header">
+          <span class="rv-title">Review Design</span>
+          <span class="final-badge"><svg width="9" height="9" viewBox="0 0 9 9" fill="none"><circle cx="4.5" cy="4.5" r="3.8" stroke="#B83232" stroke-width="1"/><path d="M4.5 2.8v2.2" stroke="#B83232" stroke-width="1" stroke-linecap="round"/><circle cx="4.5" cy="6.3" r=".5" fill="#B83232"/></svg> Final Sale</span>
+        </div>
+        <div class="review-view">
+          <p style="font-size:11px;color:var(--ink3);line-height:1.6;">Check every detail carefully before adding to cart.</p>
+          <div class="qty-row"><span class="sl" style="margin:0">Quantity</span><div class="qty-ctrl"><button class="qty-btn" onclick="changeQty(-1)">−</button><span class="qty-n" id="qty-n">1</span><button class="qty-btn" onclick="changeQty(1)">+</button></div></div>
+          <div style="height:1px;background:var(--bdr)"></div>
+          <div id="review-lines"></div>
+          <div style="height:1px;background:var(--bdr)"></div>
+          <div class="r-total-row"><span class="r-total-lbl">Total</span><span class="r-total-val" id="r-total">$76</span></div>
+          <div class="gift-box">
+            <div class="gift-tog-row"><div><div class="gift-lbl">🎁 Gift packaging</div><div class="gift-sub">Branded box + ribbon · +$5</div></div><button class="tog-pill" id="gift-tog" onclick="toggleGift()"></button></div>
+            <div class="gift-tog-row"><div><div class="gift-lbl">✉️ Message card</div><div class="gift-sub">Handwritten-style · Free</div></div><button class="tog-pill" id="msg-tog" onclick="toggleMsg()"></button></div>
+            <textarea class="gift-msg" id="gift-msg" placeholder="Write your message here…" maxlength="200"></textarea>
+          </div>
+          <div class="share-row">
+            <button class="share-btn" onclick="alert('Link copied!')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="9.5" cy="2" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="2.5" cy="6" r="1.5" stroke="currentColor" stroke-width="1.1"/><circle cx="9.5" cy="10" r="1.5" stroke="currentColor" stroke-width="1.1"/><path d="M4 5.3l4.2-2.4M4 6.7l4.2 2.3" stroke="currentColor" stroke-width="1.1"/></svg> Share Design</button>
+            <button class="share-btn" onclick="alert('Downloading…')"><svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 2v5.5M4 6L6 8l2-2" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 9.5h8" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg> Download</button>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+
+  <!-- BOTTOM BAR -->
+  <footer class="bar">
+    <div class="bar-pr"><span class="bar-pl">Base</span><span class="bar-pv" id="bar-base">$76</span></div>
+    <div class="bar-dv"></div>
+    <div class="bar-pr"><span class="bar-pl">Personalization</span><span class="bar-pv acc" id="bar-add">$0</span><span class="bar-ps" id="bar-add-sub"></span></div>
+    <div class="bar-dv"></div>
+    <div class="bar-pr"><span class="bar-pl">Subtotal</span><span class="bar-pv" id="bar-sub">$76</span></div>
+    <div class="bar-sp"></div>
+    <button class="save-btn" onclick="alert('Design saved ✓')"><svg width="11" height="11" viewBox="0 0 11 11" fill="none"><path d="M1.5 6l2.5 2.5 5.5-5.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg> Save</button>
+    <button class="rev-btn" id="btn-review" onclick="goReview()">Review Design →</button>
+    <button class="back-btn hidden" id="btn-back" onclick="backToDesign()">← Edit Design</button>
+    <button class="rev-btn acc hidden" id="btn-cart" onclick="doCart()">Add to Cart →</button>
+  </footer>
+
+</div>
+
+<!-- MODAL -->
+<div class="modal-ov" id="modal">
+  <div class="modal">
+    <div class="modal-title">Reset Your Design?</div>
+    <p class="modal-body">This clears your kit, color, and all engravings. This cannot be undone.</p>
+    <div class="modal-acts"><button class="modal-keep" onclick="closeModal()">Keep Design</button><button class="modal-rst" onclick="doReset()">Yes, Reset</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ STATE ══════════ */
+const KITS={wallet:{label:'Wallet Only',base:76,items:['wallet']},driver:{label:'Driver Kit',base:105,items:['wallet','keycase']},survival:{label:'Survival Kit',base:125,items:['wallet','keycase','knife']}};
+const LABELS={wallet:'Wallet',keycase:'Keycase',knife:'Knife'};
+const TAGS={wallet:'Text · Mono · Icon',keycase:'Text only',knife:'Text only'};
+
+const S={
+  kit:'wallet',activeItem:'wallet',wizPage:1,step:1,qty:1,gift:false,msg:false,
+  walletColor:'#2A4A8A',walletColorName:'Alpine Navy',
+  items:{
+    wallet:{decoType:null,text:'',pl:'br',font:'Alex Brush',mF:'',mM:'',mL:'',mFont:'Cinzel',icon:'',engrave:false},
+    keycase:{text:'',engrave:false},
+    knife:{text:'',engrave:false}
+  }
+};
+
+/* ══════════ WIZ NAVIGATION ══════════ */
+let currentPage = 1;
+
+function goToPage(n) {
+  // wallet-only: skip step 2 (item selection) entirely
+  if (n === 2 && S.kit === 'wallet') {
+    S.activeItem = 'wallet';
+    buildEngraveContent('wallet');
+    setPreview('wallet');
+    navigatePage(3);
+    return;
+  }
+  // kit flow: build item accordion when entering step 2
+  if (n === 2) buildItemAccordion('wallet');
+  navigatePage(n);
+}
+
+function navigatePage(n) {
+  const prev = document.getElementById('pg'+currentPage);
+  const next = document.getElementById('pg'+n);
+  if (!next) return;
+
+  // exit animation
+  prev.classList.add(n > currentPage ? 'exit-left' : '');
+  setTimeout(() => { prev.classList.remove('on','exit-left'); }, 220);
+
+  next.style.transform = n > currentPage ? 'translateX(20px)' : 'translateX(-20px)';
+  next.style.opacity = '0';
+  next.classList.add('on');
+  requestAnimationFrame(() => { next.style.transform = ''; next.style.opacity = ''; });
+
+  currentPage = n;
+  S.wizPage = n;
+  updateWizStrip();
+  updateBar();
+}
+
+function updateWizStrip() {
+  const n = currentPage;
+  const total = 4;
+  // determine visible steps based on kit
+  const isKitOnly = S.kit === 'wallet';
+  // for wallet only, steps are 1,3,4 (step 2 hidden)
+  const stepMap = isKitOnly ? [1,3,4] : [1,2,3,4];
+
+  for (let i = 1; i <= 4; i++) {
+    const num = document.getElementById('wn'+i);
+    const lbl = document.getElementById('wl'+i);
+    const bar = document.getElementById('wb'+i);
+    if (!num) continue;
+    if (i < n) { num.className='ws-num dn'; lbl.className='ws-label'; }
+    else if (i === n) { num.className='ws-num on'; lbl.className='ws-label on'; }
+    else { num.className='ws-num'; lbl.className='ws-label'; }
+    if (bar) bar.className = 'ws-bar' + (i < n ? ' filled' : '');
+  }
+
+  // Hide step 2 indicator for wallet-only
+  const s2num = document.getElementById('wn2');
+  const s2lbl = document.getElementById('wl2');
+  const s2bar = document.getElementById('wb1');
+  if (isKitOnly) { s2num.style.opacity='0.3'; s2lbl.style.opacity='0.3'; }
+  else { s2num.style.opacity=''; s2lbl.style.opacity=''; }
+
+  // progress bar
+  const pct = Math.round(((n-1) / (total-1)) * 100);
+  document.getElementById('prog-fill').style.width = pct + '%';
+}
+
+/* ══════════ STEP 1: KIT + COLOR ══════════ */
+function pickKit(kit, el) {
+  S.kit = kit;
+  document.querySelectorAll('.kit-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('kit-chip-label').textContent = KITS[kit].label;
+  updateBar();
+}
+
+function pickColor(el) {
+  document.querySelectorAll('.sw').forEach(s => s.classList.remove('on'));
+  el.classList.add('on');
+  S.walletColor = el.dataset.hex; S.walletColorName = el.dataset.color;
+  document.getElementById('color-name').textContent = S.walletColorName;
+  document.getElementById('w-body').setAttribute('fill', S.walletColor);
+}
+
+/* ══════════ STEP 1: KIT + COLOR (continued) ══════════ */
+
+/* ══════════ STEP 2: ITEM ACCORDION ══════════ */
+function buildItemAccordion(openId) {
+  const items = KITS[S.kit].items;
+  const container = document.getElementById('item-accordion-container');
+  container.innerHTML = items.map(id => `
+    <div class="item-acc${S.items[id].engrave ? ' has-engrave' : ''}${openId === id ? ' open' : ''}" id="iacc-${id}">
+      <div class="item-acc-hd" onclick="toggleItemAcc('${id}')">
+        <div class="item-acc-dot"></div>
+        <div class="item-acc-info">
+          <div class="item-acc-name">${LABELS[id]}</div>
+          <div class="item-acc-status${S.items[id].engrave ? ' done' : ''}" id="iacc-st-${id}">${S.items[id].engrave ? itemStatusLabel(id) : 'Tap to personalize — optional'}</div>
+        </div>
+        <span class="item-acc-tag">${TAGS[id]}</span>
+        <span class="item-acc-chev">▾</span>
+      </div>
+      <div class="item-acc-body">
+        <div class="item-acc-inner" id="iacc-inner-${id}">
+          ${buildInlineDecoHTML(id)}
+        </div>
+      </div>
+    </div>
+  `).join('');
+  // attach live listeners for any inputs that were just rendered
+  items.forEach(id => attachInlineListeners(id));
+}
+
+function toggleItemAcc(id) {
+  const acc = document.getElementById('iacc-'+id);
+  const isOpen = acc.classList.contains('open');
+  // close all
+  KITS[S.kit].items.forEach(i => document.getElementById('iacc-'+i)?.classList.remove('open'));
+  // open tapped one (unless it was already open — toggle off)
+  if (!isOpen) {
+    acc.classList.add('open');
+    S.activeItem = id;
+    setPreview(id);
+    showEditChip(id);
+  } else {
+    // reset preview to wallet when closing
+    setPreview('wallet');
+    document.getElementById('edit-chip').classList.add('hide');
+  }
+}
+
+function buildInlineDecoHTML(id) {
+  if (id === 'wallet') {
+    const it = S.items.wallet;
+    return `
+      <p class="deco-note">Pick one — adds +$15 personalization fee.</p>
+      <div class="deco-grid" id="ideco-wallet">
+        <div class="deco-card${it.decoType==='text'?' on':''}" onclick="inlinePickDeco('wallet','text',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M9 5v8M6 13h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="deco-lbl">Text</span></div>
+        <div class="deco-card${it.decoType==='mono'?' on':''}" onclick="inlinePickDeco('wallet','mono',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L7 5l2 4 2-4 4 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="deco-lbl">Monogram</span></div>
+        <div class="deco-card${it.decoType==='icon'?' on':''}" onclick="inlinePickDeco('wallet','icon',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,2.5 11.3,7.2 16.5,7.9 12.75,11.5 13.6,16.7 9,14.25 4.4,16.7 5.25,11.5 1.5,7.9 6.7,7.2" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span><span class="deco-lbl">Icon</span></div>
+      </div>
+      <div id="inline-w-text" style="display:${it.decoType==='text'?'':'none'}">
+        <div class="divider"></div>
+        <span class="sl">Your Text</span>
+        <input class="tx" id="inline-w-tx" type="text" maxlength="16" placeholder="e.g. JOHN DOE" autocomplete="off" value="${it.text}">
+        <div class="ctr-row"><span class="ctr" id="inline-w-ctr">${it.text.length}/16</span><span class="laser-tag">Laser engraved</span></div>
+        <div style="margin-top:12px"><span class="sl">Placement</span>
+          <div class="pl-grid">
+            <div class="pl-card${it.pl==='br'?' on':''}" onclick="inlinePickPl(this,'br')"><svg class="mini-w" viewBox="0 0 76 48" fill="none"><rect x="1" y="1" width="74" height="46" rx="5" fill="#E8E4DF" stroke="#D0CAC4" stroke-width="1"/><circle cx="10" cy="9" r="2.5" fill="#D0CAC4"/><circle cx="66" cy="9" r="2.5" fill="#D0CAC4"/><rect x="45" y="36" width="22" height="3.5" rx="1.5" fill="#B8872E" opacity=".8"/></svg><span class="pl-lbl">Bottom Right</span></div>
+            <div class="pl-card${it.pl==='c'?' on':''}" onclick="inlinePickPl(this,'c')"><svg class="mini-w" viewBox="0 0 76 48" fill="none"><rect x="1" y="1" width="74" height="46" rx="5" fill="#E8E4DF" stroke="#D0CAC4" stroke-width="1"/><circle cx="10" cy="9" r="2.5" fill="#D0CAC4"/><circle cx="66" cy="9" r="2.5" fill="#D0CAC4"/><rect x="27" y="36" width="22" height="3.5" rx="1.5" fill="#B8872E" opacity=".4"/></svg><span class="pl-lbl">Center</span></div>
+          </div>
+        </div>
+        <div style="margin-top:12px"><span class="sl">Font</span>
+          <div class="font-list" id="inline-w-fonts">
+            <div class="font-item${it.font==='Alex Brush'?' on':''}" onclick="inlinePickFont(this,'Alex Brush')"><span class="font-samp" style="font-family:'Alex Brush',cursive">Alex Brush</span><span class="font-tag">Script</span></div>
+            <div class="font-item${it.font==='Playfair Display'?' on':''}" onclick="inlinePickFont(this,'Playfair Display')"><span class="font-samp" style="font-family:'Playfair Display',serif">Playfair</span><span class="font-tag">Serif</span></div>
+            <div class="font-item${it.font==='Cinzel'?' on':''}" onclick="inlinePickFont(this,'Cinzel')"><span class="font-samp" style="font-family:'Cinzel',serif">CINZEL</span><span class="font-tag">Classical</span></div>
+            <div class="font-item${it.font==='Manrope'?' on':''}" onclick="inlinePickFont(this,'Manrope')"><span class="font-samp" style="font-family:'Manrope',sans-serif">Manrope</span><span class="font-tag">Modern</span></div>
+            <div class="font-item${it.font==='Bebas Neue'?' on':''}" onclick="inlinePickFont(this,'Bebas Neue')"><span class="font-samp" style="font-family:'Bebas Neue',sans-serif">BEBAS NEUE</span><span class="font-tag">Industrial</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="inline-w-mono" style="display:${it.decoType==='mono'?'':'none'}">
+        <div class="divider"></div>
+        <span class="sl">Initials</span>
+        <div class="mono-row">
+          <div class="mono-col"><span class="mono-lbl">First</span><input class="mono-in" id="inline-mF" maxlength="1" placeholder="J" autocomplete="off" value="${it.mF}"></div>
+          <div class="mono-col"><span class="mono-lbl">Middle</span><input class="mono-in" id="inline-mM" maxlength="1" placeholder="A" autocomplete="off" value="${it.mM}"></div>
+          <div class="mono-col"><span class="mono-lbl">Last</span><input class="mono-in" id="inline-mL" maxlength="1" placeholder="D" autocomplete="off" value="${it.mL}"></div>
+        </div>
+        <div style="margin-top:12px"><span class="sl">Style</span>
+          <div class="font-list">
+            <div class="font-item${it.mFont==='Cinzel'?' on':''}" onclick="inlinePickMFont(this,'Cinzel')"><span class="font-samp" style="font-family:'Cinzel',serif">JAD</span><span class="font-tag">Classical</span></div>
+            <div class="font-item${it.mFont==='Playfair Display'?' on':''}" onclick="inlinePickMFont(this,'Playfair Display')"><span class="font-samp" style="font-family:'Playfair Display',serif;font-style:italic">JAD</span><span class="font-tag">Italic</span></div>
+            <div class="font-item${it.mFont==='Bebas Neue'?' on':''}" onclick="inlinePickMFont(this,'Bebas Neue')"><span class="font-samp" style="font-family:'Bebas Neue',sans-serif">JAD</span><span class="font-tag">Industrial</span></div>
+          </div>
+        </div>
+      </div>
+      <div id="inline-w-icon" style="display:${it.decoType==='icon'?'':'none'}">
+        <div class="divider"></div>
+        <span class="sl">Choose an Icon</span>
+        <div class="icon-grid">
+          <div class="icon-card${it.icon==='⚡'?' on':''}" onclick="inlinePickIcon(this,'⚡')"><span class="icon-g">⚡</span><span class="icon-n">Lightning</span></div>
+          <div class="icon-card${it.icon==='❤️'?' on':''}" onclick="inlinePickIcon(this,'❤️')"><span class="icon-g">❤️</span><span class="icon-n">Heart</span></div>
+          <div class="icon-card${it.icon==='★'?' on':''}" onclick="inlinePickIcon(this,'★')"><span class="icon-g">★</span><span class="icon-n">Star</span></div>
+          <div class="icon-card${it.icon==='⚓'?' on':''}" onclick="inlinePickIcon(this,'⚓')"><span class="icon-g">⚓</span><span class="icon-n">Anchor</span></div>
+          <div class="icon-card${it.icon==='🏔'?' on':''}" onclick="inlinePickIcon(this,'🏔')"><span class="icon-g">🏔</span><span class="icon-n">Mountain</span></div>
+          <div class="icon-card${it.icon==='🌊'?' on':''}" onclick="inlinePickIcon(this,'🌊')"><span class="icon-g">🌊</span><span class="icon-n">Wave</span></div>
+          <div class="icon-card${it.icon==='♠'?' on':''}" onclick="inlinePickIcon(this,'♠')"><span class="icon-g">♠</span><span class="icon-n">Spade</span></div>
+          <div class="icon-card${it.icon==='✈️'?' on':''}" onclick="inlinePickIcon(this,'✈️')"><span class="icon-g">✈️</span><span class="icon-n">Plane</span></div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div class="item-skip" onclick="inlineClearItem('wallet')">Clear engraving for Wallet</div>`;
+  } else {
+    const it = S.items[id];
+    return `
+      <p class="item-note">${LABELS[id]} — text engraving · +$15 · Leave blank to skip</p>
+      <input class="tx" id="inline-tx-${id}" type="text" maxlength="16" placeholder="e.g. JOHN DOE" autocomplete="off" value="${it.text}">
+      <div class="ctr-row"><span class="ctr" id="inline-ctr-${id}">${it.text.length}/16</span><span class="laser-tag">Laser engraved</span></div>
+      <div class="divider"></div>
+      <div class="item-skip" onclick="inlineClearItem('${id}')">Clear engraving for ${LABELS[id]}</div>`;
+  }
+}
+
+function attachInlineListeners(id) {
+  if (id === 'wallet') {
+    const tx = document.getElementById('inline-w-tx');
+    if (tx) tx.addEventListener('input', function() { inlineOnWText(this); });
+    const mF = document.getElementById('inline-mF');
+    const mM = document.getElementById('inline-mM');
+    const mL = document.getElementById('inline-mL');
+    if (mF) mF.addEventListener('input', inlineOnMono);
+    if (mM) mM.addEventListener('input', inlineOnMono);
+    if (mL) mL.addEventListener('input', inlineOnMono);
+  } else {
+    const tx = document.getElementById('inline-tx-'+id);
+    if (tx) tx.addEventListener('input', function() { inlineOnSimpleText(this, id); });
+  }
+}
+
+/* ── inline deco handlers (wallet) ── */
+function inlinePickDeco(item, type, el) {
+  const it = S.items.wallet;
+  if (it.decoType === type) {
+    el.classList.remove('on');
+    inlineClearItem('wallet');
+    return;
+  }
+  // clear previous
+  it.decoType = null; it.text = ''; it.mF = ''; it.mM = ''; it.mL = ''; it.icon = ''; it.engrave = false;
+  ['w-engrave-br','w-engrave-c','w-mono','w-icon'].forEach(i => document.getElementById(i).textContent = '');
+  it.decoType = type;
+  document.querySelectorAll('#ideco-wallet .deco-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+  ['inline-w-text','inline-w-mono','inline-w-icon'].forEach(sid => { const e = document.getElementById(sid); if(e) e.style.display = 'none'; });
+  if (type === 'text') { const e = document.getElementById('inline-w-text'); if(e) e.style.display = ''; }
+  if (type === 'mono') { const e = document.getElementById('inline-w-mono'); if(e) e.style.display = ''; }
+  if (type === 'icon') { const e = document.getElementById('inline-w-icon'); if(e) e.style.display = ''; }
+  updateBar();
+}
+
+function inlineOnWText(input) {
+  const val = input.value.toUpperCase(); input.value = val;
+  S.items.wallet.text = val; S.items.wallet.engrave = val.length > 0;
+  const len = val.length;
+  const c = document.getElementById('inline-w-ctr');
+  if (c) { c.textContent = len+'/16'; c.className = 'ctr'+(len>=16?' max':len>=12?' warn':''); }
+  const ff = `'${S.items.wallet.font}',cursive,serif,sans-serif`;
+  const eBr = document.getElementById('w-engrave-br'); const eC = document.getElementById('w-engrave-c');
+  eBr.style.fontFamily = ff; eC.style.fontFamily = ff;
+  eBr.textContent = S.items.wallet.pl === 'br' ? val : '';
+  eC.textContent  = S.items.wallet.pl === 'c'  ? val : '';
+  updateAccordionCard('wallet'); updateBar();
+}
+
+function inlinePickPl(el, pl) {
+  document.querySelectorAll('#inline-w-text .pl-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on'); S.items.wallet.pl = pl;
+  const v = S.items.wallet.text;
+  document.getElementById('w-engrave-br').textContent = pl === 'br' ? v : '';
+  document.getElementById('w-engrave-c').textContent  = pl === 'c'  ? v : '';
+}
+
+function inlinePickFont(el, font) {
+  document.querySelectorAll('#inline-w-fonts .font-item').forEach(f => f.classList.remove('on'));
+  el.classList.add('on'); S.items.wallet.font = font;
+  const ff = `'${font}',cursive,serif,sans-serif`;
+  document.getElementById('w-engrave-br').style.fontFamily = ff;
+  document.getElementById('w-engrave-c').style.fontFamily  = ff;
+}
+
+function inlineOnMono() {
+  const f = (document.getElementById('inline-mF')?.value || '').toUpperCase();
+  const m = (document.getElementById('inline-mM')?.value || '').toUpperCase();
+  const l = (document.getElementById('inline-mL')?.value || '').toUpperCase();
+  if (document.getElementById('inline-mF')) document.getElementById('inline-mF').value = f;
+  if (document.getElementById('inline-mM')) document.getElementById('inline-mM').value = m;
+  if (document.getElementById('inline-mL')) document.getElementById('inline-mL').value = l;
+  S.items.wallet.mF = f; S.items.wallet.mM = m; S.items.wallet.mL = l;
+  const mono = f + m + l; S.items.wallet.engrave = mono.length > 0;
+  const el = document.getElementById('w-mono');
+  el.textContent = mono; el.style.fontFamily = `'${S.items.wallet.mFont}',serif,sans-serif`;
+  updateAccordionCard('wallet'); updateBar();
+}
+
+function inlinePickMFont(el, font) {
+  document.querySelectorAll('#inline-w-mono .font-item').forEach(f => f.classList.remove('on'));
+  el.classList.add('on'); S.items.wallet.mFont = font;
+  document.getElementById('w-mono').style.fontFamily = `'${font}',serif,sans-serif`;
+}
+
+function inlinePickIcon(el, glyph) {
+  document.querySelectorAll('#inline-w-icon .icon-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on'); S.items.wallet.icon = glyph; S.items.wallet.engrave = true;
+  document.getElementById('w-icon').textContent = glyph;
+  updateAccordionCard('wallet'); updateBar();
+}
+
+function inlineOnSimpleText(input, id) {
+  const val = input.value.toUpperCase(); input.value = val;
+  S.items[id].text = val; S.items[id].engrave = val.length > 0;
+  const len = val.length;
+  const c = document.getElementById('inline-ctr-'+id);
+  if (c) { c.textContent = len+'/16'; c.className = 'ctr'+(len>=16?' max':len>=12?' warn':''); }
+  if (id === 'keycase') document.getElementById('k-engrave').textContent = val;
+  if (id === 'knife')   document.getElementById('kn-engrave').textContent = val;
+  updateAccordionCard(id); updateBar();
+}
+
+function inlineClearItem(id) {
+  if (id === 'wallet') {
+    S.items.wallet.decoType = null; S.items.wallet.text = ''; S.items.wallet.mF = '';
+    S.items.wallet.mM = ''; S.items.wallet.mL = ''; S.items.wallet.icon = ''; S.items.wallet.engrave = false;
+    ['w-engrave-br','w-engrave-c','w-mono','w-icon'].forEach(i => document.getElementById(i).textContent = '');
+  } else {
+    S.items[id].text = ''; S.items[id].engrave = false;
+    if (id === 'keycase') document.getElementById('k-engrave').textContent = '';
+    if (id === 'knife')   document.getElementById('kn-engrave').textContent = '';
+  }
+  updateAccordionCard(id); updateBar();
+  // rebuild that item's accordion content to reset UI state
+  const inner = document.getElementById('iacc-inner-'+id);
+  if (inner) { inner.innerHTML = buildInlineDecoHTML(id); attachInlineListeners(id); }
+  document.getElementById('iacc-'+id)?.classList.remove('has-engrave');
+}
+
+function updateAccordionCard(id) {
+  const acc = document.getElementById('iacc-'+id);
+  const st  = document.getElementById('iacc-st-'+id);
+  if (!acc || !st) return;
+  const has = S.items[id].engrave;
+  acc.classList.toggle('has-engrave', has);
+  st.textContent = has ? itemStatusLabel(id) : 'Tap to personalize — optional';
+  st.className = 'item-acc-status' + (has ? ' done' : '');
+}
+
+function itemStatusLabel(id) {
+  const it = S.items[id];
+  if (!it.engrave) return 'Tap to personalize';
+  if (id==='wallet') {
+    if (it.decoType==='text')  return `"${it.text}"`;
+    if (it.decoType==='mono')  return `${it.mF}${it.mM}${it.mL} Monogram`;
+    if (it.decoType==='icon')  return `${it.icon} Icon`;
+  }
+  return `"${it.text}"`;
+}
+
+/* ══════════ STEP 3: ENGRAVE ══════════ */
+function buildEngraveContent(id) {
+  const lbl = LABELS[id];
+  document.getElementById('pg3-title').textContent = 'Engrave your ' + lbl;
+  const content = document.getElementById('pg3-content');
+
+  if (id === 'wallet') {
+    content.innerHTML = `
+    <div>
+      <p class="deco-note">Pick one — adds +$15 personalization fee.</p>
+      <br>
+      <div class="deco-grid">
+        <div class="deco-card${S.items.wallet.decoType==='text'?' on':''}" onclick="pickDeco('text',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 5h12M9 5v8M6 13h6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></span><span class="deco-lbl">Text</span></div>
+        <div class="deco-card${S.items.wallet.decoType==='mono'?' on':''}" onclick="pickDeco('mono',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M3 13L7 5l2 4 2-4 4 8" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="deco-lbl">Monogram</span></div>
+        <div class="deco-card${S.items.wallet.decoType==='icon'?' on':''}" onclick="pickDeco('icon',this)"><span class="deco-icon"><svg width="18" height="18" viewBox="0 0 18 18" fill="none"><polygon points="9,2.5 11.3,7.2 16.5,7.9 12.75,11.5 13.6,16.7 9,14.25 4.4,16.7 5.25,11.5 1.5,7.9 6.7,7.2" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" fill="none"/></svg></span><span class="deco-lbl">Icon</span></div>
+      </div>
+    </div>
+    <div id="w-text-s" style="display:none">
+      <div class="divider"></div>
+      <span class="sl">Your Text</span>
+      <input class="tx" id="w-tx" type="text" maxlength="16" placeholder="e.g. JOHN DOE" oninput="onWText(this)" autocomplete="off" value="${S.items.wallet.text}">
+      <div class="ctr-row"><span class="ctr" id="w-ctr">${S.items.wallet.text.length}/16</span><span class="laser-tag">Laser engraved</span></div>
+      <div style="margin-top:12px"><span class="sl">Placement</span>
+        <div class="pl-grid">
+          <div class="pl-card${S.items.wallet.pl==='br'?' on':''}" onclick="pickPl(this,'br')"><svg class="mini-w" viewBox="0 0 76 48" fill="none"><rect x="1" y="1" width="74" height="46" rx="5" fill="#E8E4DF" stroke="#D0CAC4" stroke-width="1"/><circle cx="10" cy="9" r="2.5" fill="#D0CAC4"/><circle cx="66" cy="9" r="2.5" fill="#D0CAC4"/><rect x="45" y="36" width="22" height="3.5" rx="1.5" fill="#B8872E" opacity=".8"/></svg><span class="pl-lbl">Bottom Right</span></div>
+          <div class="pl-card${S.items.wallet.pl==='c'?' on':''}" onclick="pickPl(this,'c')"><svg class="mini-w" viewBox="0 0 76 48" fill="none"><rect x="1" y="1" width="74" height="46" rx="5" fill="#E8E4DF" stroke="#D0CAC4" stroke-width="1"/><circle cx="10" cy="9" r="2.5" fill="#D0CAC4"/><circle cx="66" cy="9" r="2.5" fill="#D0CAC4"/><rect x="27" y="36" width="22" height="3.5" rx="1.5" fill="#B8872E" opacity=".4"/></svg><span class="pl-lbl">Center</span></div>
+        </div>
+      </div>
+      <div style="margin-top:12px"><span class="sl">Font</span>
+        <div class="font-list">
+          <div class="font-item${S.items.wallet.font==='Alex Brush'?' on':''}" data-font="Alex Brush" onclick="pickFont(this,'Alex Brush')"><span class="font-samp" style="font-family:'Alex Brush',cursive">Alex Brush</span><span class="font-tag">Script</span></div>
+          <div class="font-item${S.items.wallet.font==='Playfair Display'?' on':''}" data-font="Playfair Display" onclick="pickFont(this,'Playfair Display')"><span class="font-samp" style="font-family:'Playfair Display',serif">Playfair</span><span class="font-tag">Serif</span></div>
+          <div class="font-item${S.items.wallet.font==='Cinzel'?' on':''}" data-font="Cinzel" onclick="pickFont(this,'Cinzel')"><span class="font-samp" style="font-family:'Cinzel',serif">CINZEL</span><span class="font-tag">Classical</span></div>
+          <div class="font-item${S.items.wallet.font==='Manrope'?' on':''}" data-font="Manrope" onclick="pickFont(this,'Manrope')"><span class="font-samp" style="font-family:'Manrope',sans-serif">Manrope</span><span class="font-tag">Modern</span></div>
+          <div class="font-item${S.items.wallet.font==='Bebas Neue'?' on':''}" data-font="Bebas Neue" onclick="pickFont(this,'Bebas Neue')"><span class="font-samp" style="font-family:'Bebas Neue',sans-serif">BEBAS NEUE</span><span class="font-tag">Industrial</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="w-mono-s" style="display:none">
+      <div class="divider"></div>
+      <span class="sl">Initials</span>
+      <div class="mono-row">
+        <div class="mono-col"><span class="mono-lbl">First</span><input class="mono-in" id="mF" maxlength="1" placeholder="J" oninput="onMono()" autocomplete="off" value="${S.items.wallet.mF}"></div>
+        <div class="mono-col"><span class="mono-lbl">Middle</span><input class="mono-in" id="mM" maxlength="1" placeholder="A" oninput="onMono()" autocomplete="off" value="${S.items.wallet.mM}"></div>
+        <div class="mono-col"><span class="mono-lbl">Last</span><input class="mono-in" id="mL" maxlength="1" placeholder="D" oninput="onMono()" autocomplete="off" value="${S.items.wallet.mL}"></div>
+      </div>
+      <div style="margin-top:12px"><span class="sl">Style</span>
+        <div class="font-list">
+          <div class="font-item${S.items.wallet.mFont==='Cinzel'?' on':''}" data-mf="Cinzel" onclick="pickMFont(this,'Cinzel')"><span class="font-samp" style="font-family:'Cinzel',serif">JAD</span><span class="font-tag">Classical</span></div>
+          <div class="font-item${S.items.wallet.mFont==='Playfair Display'?' on':''}" data-mf="Playfair Display" onclick="pickMFont(this,'Playfair Display')"><span class="font-samp" style="font-family:'Playfair Display',serif;font-style:italic">JAD</span><span class="font-tag">Italic</span></div>
+          <div class="font-item${S.items.wallet.mFont==='Bebas Neue'?' on':''}" data-mf="Bebas Neue" onclick="pickMFont(this,'Bebas Neue')"><span class="font-samp" style="font-family:'Bebas Neue',sans-serif">JAD</span><span class="font-tag">Industrial</span></div>
+        </div>
+      </div>
+    </div>
+    <div id="w-icon-s" style="display:none">
+      <div class="divider"></div>
+      <span class="sl">Choose an Icon</span>
+      <div class="icon-grid">
+        <div class="icon-card${S.items.wallet.icon==='⚡'?' on':''}" onclick="pickIcon(this,'⚡')"><span class="icon-g">⚡</span><span class="icon-n">Lightning</span></div>
+        <div class="icon-card${S.items.wallet.icon==='❤️'?' on':''}" onclick="pickIcon(this,'❤️')"><span class="icon-g">❤️</span><span class="icon-n">Heart</span></div>
+        <div class="icon-card${S.items.wallet.icon==='★'?' on':''}" onclick="pickIcon(this,'★')"><span class="icon-g">★</span><span class="icon-n">Star</span></div>
+        <div class="icon-card${S.items.wallet.icon==='⚓'?' on':''}" onclick="pickIcon(this,'⚓')"><span class="icon-g">⚓</span><span class="icon-n">Anchor</span></div>
+        <div class="icon-card${S.items.wallet.icon==='🏔'?' on':''}" onclick="pickIcon(this,'🏔')"><span class="icon-g">🏔</span><span class="icon-n">Mountain</span></div>
+        <div class="icon-card${S.items.wallet.icon==='🌊'?' on':''}" onclick="pickIcon(this,'🌊')"><span class="icon-g">🌊</span><span class="icon-n">Wave</span></div>
+        <div class="icon-card${S.items.wallet.icon==='♠'?' on':''}" onclick="pickIcon(this,'♠')"><span class="icon-g">♠</span><span class="icon-n">Spade</span></div>
+        <div class="icon-card${S.items.wallet.icon==='✈️'?' on':''}" onclick="pickIcon(this,'✈️')"><span class="icon-g">✈️</span><span class="icon-n">Plane</span></div>
+      </div>
+    </div>
+    <div class="divider" style="margin-top:4px"></div>
+    <div class="skip-link" onclick="skipEngraving()">Skip — leave this item un-engraved</div>`;
+    // show active sub-section
+    if (S.items.wallet.decoType === 'text') { const el = document.getElementById('w-text-s'); if(el) el.style.display=''; }
+    if (S.items.wallet.decoType === 'mono') { const el = document.getElementById('w-mono-s'); if(el) el.style.display=''; }
+    if (S.items.wallet.decoType === 'icon') { const el = document.getElementById('w-icon-s'); if(el) el.style.display=''; }
+  } else {
+    content.innerHTML = `
+    <p class="item-note">${lbl} text engraving · +$15 · Leave blank to skip</p>
+    <div class="divider"></div>
+    <input class="tx" id="simple-tx" type="text" maxlength="16" placeholder="e.g. JOHN DOE" oninput="onSimpleText(this)" autocomplete="off" value="${S.items[id].text}">
+    <div class="ctr-row"><span class="ctr" id="simple-ctr">${S.items[id].text.length}/16</span><span class="laser-tag">Laser engraved</span></div>
+    <div class="divider" style="margin-top:6px"></div>
+    <div class="skip-link" onclick="skipEngraving()">Skip — leave this item un-engraved</div>`;
+  }
+}
+
+function skipEngraving() {
+  S.items.wallet.engrave = false;
+  afterEngraving();
+}
+
+function afterEngraving() {
+  updateAccordionCard(S.activeItem);
+  updateBar();
+  if (S.kit === 'wallet') {
+    navigatePage(4);
+  } else {
+    buildItemAccordion(null);
+    navigatePage(2);
+  }
+}
+
+function backFromEngraving() {
+  if (S.kit === 'wallet') navigatePage(1);
+  else { buildItemAccordion(null); navigatePage(2); }
+}
+
+function backFromBulk() {
+  if (S.kit === 'wallet') {
+    buildEngraveContent('wallet');
+    navigatePage(3);
+  } else {
+    buildItemAccordion(null);
+    navigatePage(2);
+  }
+}
+
+/* ── wallet deco ── */
+function pickDeco(type, el) {
+  if (S.items.wallet.decoType === type) { el.classList.remove('on'); clearWDeco(); hideWSects(); return; }
+  clearWDeco(); S.items.wallet.decoType = type;
+  document.querySelectorAll('#pg3-content .deco-card').forEach(c => c.classList.remove('on'));
+  el.classList.add('on'); hideWSects();
+  if(type==='text'){const e=document.getElementById('w-text-s');if(e)e.style.display='';}
+  if(type==='mono'){const e=document.getElementById('w-mono-s');if(e)e.style.display='';}
+  if(type==='icon'){const e=document.getElementById('w-icon-s');if(e)e.style.display='';}
+  updateBar();
+}
+function hideWSects(){['w-text-s','w-mono-s','w-icon-s'].forEach(id=>{const e=document.getElementById(id);if(e)e.style.display='none';});}
+function clearWDeco(){const it=S.items.wallet;it.decoType=null;it.text='';it.mF='';it.mM='';it.mL='';it.icon='';it.engrave=false;['w-engrave-br','w-engrave-c','w-mono','w-icon'].forEach(id=>document.getElementById(id).textContent='');updateBar();}
+
+function onWText(input){
+  const val=input.value.toUpperCase();input.value=val;
+  S.items.wallet.text=val;S.items.wallet.engrave=val.length>0;
+  const len=val.length;const c=document.getElementById('w-ctr');
+  if(c){c.textContent=len+'/16';c.className='ctr'+(len>=16?' max':len>=12?' warn':'');}
+  const ff=`'${S.items.wallet.font}',cursive,serif,sans-serif`;
+  const eBr=document.getElementById('w-engrave-br');const eC=document.getElementById('w-engrave-c');
+  eBr.style.fontFamily=ff;eC.style.fontFamily=ff;
+  eBr.textContent=S.items.wallet.pl==='br'?val:'';eC.textContent=S.items.wallet.pl==='c'?val:'';
+  updateAccordionCard('wallet');updateBar();
+}
+function pickPl(el,pl){document.querySelectorAll('.pl-card').forEach(c=>c.classList.remove('on'));el.classList.add('on');S.items.wallet.pl=pl;const v=S.items.wallet.text;document.getElementById('w-engrave-br').textContent=pl==='br'?v:'';document.getElementById('w-engrave-c').textContent=pl==='c'?v:'';}
+function pickFont(el,font){document.querySelectorAll('.font-item[data-font]').forEach(f=>f.classList.remove('on'));el.classList.add('on');S.items.wallet.font=font;const ff=`'${font}',cursive,serif,sans-serif`;document.getElementById('w-engrave-br').style.fontFamily=ff;document.getElementById('w-engrave-c').style.fontFamily=ff;}
+function onMono(){const f=(document.getElementById('mF')?.value||'').toUpperCase();const m=(document.getElementById('mM')?.value||'').toUpperCase();const l=(document.getElementById('mL')?.value||'').toUpperCase();if(document.getElementById('mF'))document.getElementById('mF').value=f;if(document.getElementById('mM'))document.getElementById('mM').value=m;if(document.getElementById('mL'))document.getElementById('mL').value=l;S.items.wallet.mF=f;S.items.wallet.mM=m;S.items.wallet.mL=l;const mono=f+m+l;S.items.wallet.engrave=mono.length>0;const el=document.getElementById('w-mono');el.textContent=mono;el.style.fontFamily=`'${S.items.wallet.mFont}',serif,sans-serif`;updateAccordionCard('wallet');updateBar();}
+function pickMFont(el,font){document.querySelectorAll('.font-item[data-mf]').forEach(f=>f.classList.remove('on'));el.classList.add('on');S.items.wallet.mFont=font;document.getElementById('w-mono').style.fontFamily=`'${font}',serif,sans-serif`;}
+function pickIcon(el,glyph){document.querySelectorAll('.icon-card').forEach(c=>c.classList.remove('on'));el.classList.add('on');S.items.wallet.icon=glyph;S.items.wallet.engrave=true;document.getElementById('w-icon').textContent=glyph;updateAccordionCard('wallet');updateBar();}
+function onSimpleText(input){const id=S.activeItem;const val=input.value.toUpperCase();input.value=val;S.items[id].text=val;S.items[id].engrave=val.length>0;const len=val.length;const c=document.getElementById('simple-ctr');if(c){c.textContent=len+'/16';c.className='ctr'+(len>=16?' max':len>=12?' warn':'');}if(id==='keycase')document.getElementById('k-engrave').textContent=val;if(id==='knife')document.getElementById('kn-engrave').textContent=val;updateAccordionCard(id);updateBar();}
+
+/* ══════════ CANVAS ══════════ */
+function setPreview(id){document.querySelectorAll('.item-preview').forEach(p=>p.classList.remove('on'));document.getElementById('prev-'+id).classList.add('on');}
+function showEditChip(id){const c=document.getElementById('edit-chip');c.classList.remove('hide');document.getElementById('edit-chip-label').textContent='Editing '+LABELS[id];document.getElementById('view-toggle').style.opacity=id==='wallet'?'1':'0.35';}
+function setView(v,btn){document.querySelectorAll('.vt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');document.getElementById('w-body').setAttribute('opacity',v==='back'?'0.84':'1');}
+
+/* ══════════ PRICING ══════════ */
+function engravedCount(){return KITS[S.kit].items.filter(id=>S.items[id].engrave).length;}
+function addonsTotal(){return engravedCount()*15+(S.gift?5:0);}
+function updateBar(){const base=KITS[S.kit].base;const adds=addonsTotal();const count=engravedCount();document.getElementById('bar-base').textContent='$'+base;document.getElementById('bar-add').textContent='$'+adds;document.getElementById('bar-add-sub').textContent=count>0?count+(count===1?' item':' items')+' engraved':'';document.getElementById('bar-sub').textContent='$'+(base+adds);}
+
+/* ══════════ REVIEW ══════════ */
+function goReview(){
+  S.step=2;
+  [1,2,3].forEach(i=>{document.getElementById('bc'+i).className='bc-num'+(i<2?' dn':i===2?' on':'');document.getElementById('bcl'+i).className='bc-label'+(i===2?' on':'');});
+  document.getElementById('wizard-ui').style.display='none';
+  const rv=document.getElementById('review-ui');rv.classList.remove('hidden');rv.style.display='flex';
+  document.getElementById('btn-review').classList.add('hidden');
+  document.getElementById('btn-back').classList.remove('hidden');
+  document.getElementById('btn-cart').classList.remove('hidden');
+  buildReview();
+}
+
+function backToDesign(){
+  S.step=1;
+  [1,2,3].forEach(i=>{document.getElementById('bc'+i).className='bc-num'+(i===1?' on':'');document.getElementById('bcl'+i).className='bc-label'+(i===1?' on':'');});
+  document.getElementById('wizard-ui').style.display='flex';
+  const rv=document.getElementById('review-ui');rv.classList.add('hidden');
+  document.getElementById('btn-review').classList.remove('hidden');
+  document.getElementById('btn-back').classList.add('hidden');
+  document.getElementById('btn-cart').classList.add('hidden');
+}
+
+function buildReview(){
+  updateBar();
+  const items=KITS[S.kit].items;const BP={wallet:76,keycase:29,knife:20};
+  let html=`<span class="r-kit-label">${KITS[S.kit].label}</span>`;
+  items.forEach(id=>{const it=S.items[id];html+=`<div class="r-line"><div><div class="r-name">${LABELS[id]}</div>`;if(id==='wallet')html+=`<div class="r-sub">${S.walletColorName}</div>`;html+=`</div><span class="r-price">$${BP[id]}</span></div>`;if(it.engrave){let desc='';if(id==='wallet'){if(it.decoType==='text')desc=`Text — "${it.text}"`;else if(it.decoType==='mono')desc=`Monogram — "${it.mF}${it.mM}${it.mL}"`;else if(it.decoType==='icon')desc=`Icon — ${it.icon}`;}else desc=`Engraving — "${it.text}"`;html+=`<div class="r-line" style="padding-left:10px"><div><div class="r-name" style="font-size:12px;font-weight:500">${desc}</div></div><span class="r-price add" style="font-size:12px">+$15</span></div>`;}else{html+=`<div class="r-line" style="padding-left:10px"><div><div class="r-name" style="font-size:11px;font-weight:400;color:var(--ink3)">No engraving</div></div><span class="r-price none">—</span></div>`;}});
+  if(S.gift)html+=`<div class="r-line"><div><div class="r-name">Gift Packaging</div></div><span class="r-price add">+$5</span></div>`;
+  document.getElementById('review-lines').innerHTML=html;
+  document.getElementById('r-total').textContent='$'+(KITS[S.kit].base+addonsTotal())*S.qty;
+}
+
+function changeQty(d){S.qty=Math.max(1,S.qty+d);document.getElementById('qty-n').textContent=S.qty;buildReview();}
+function toggleGift(){S.gift=!S.gift;document.getElementById('gift-tog').classList.toggle('on',S.gift);updateBar();buildReview();}
+function toggleMsg(){S.msg=!S.msg;document.getElementById('msg-tog').classList.toggle('on',S.msg);document.getElementById('gift-msg').classList.toggle('vis',S.msg);}
+
+/* ══════════ MODAL / RESET ══════════ */
+function openModal(){document.getElementById('modal').classList.add('open');}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function doReset(){
+  closeModal();
+  S.kit='wallet';S.activeItem='wallet';S.step=1;S.qty=1;S.gift=false;S.msg=false;
+  S.walletColor='#2A4A8A';S.walletColorName='Alpine Navy';
+  ['wallet','keycase','knife'].forEach(id=>{S.items[id]=id==='wallet'?{decoType:null,text:'',pl:'br',font:'Alex Brush',mF:'',mM:'',mL:'',mFont:'Cinzel',icon:'',engrave:false}:{text:'',engrave:false};});
+  document.getElementById('kit-chip-label').textContent='Wallet Only';
+  document.querySelectorAll('.kit-card').forEach((c,i)=>c.classList.toggle('on',i===0));
+  document.querySelectorAll('.sw').forEach((s,i)=>s.classList.toggle('on',i===0));
+  document.getElementById('color-name').textContent='Alpine Navy';
+  document.getElementById('w-body').setAttribute('fill','#2A4A8A');
+  ['w-engrave-br','w-engrave-c','w-mono','w-icon','k-engrave','kn-engrave'].forEach(id=>document.getElementById(id).textContent='');
+  document.querySelectorAll('.item-preview').forEach((p,i)=>p.classList.toggle('on',i===0));
+  document.getElementById('edit-chip').classList.add('hide');
+  document.getElementById('wizard-ui').style.display='flex';
+  const rv=document.getElementById('review-ui');rv.classList.add('hidden');rv.style.display='';
+  document.getElementById('btn-review').classList.remove('hidden');
+  document.getElementById('btn-back').classList.add('hidden');
+  document.getElementById('btn-cart').classList.add('hidden');
+  [1,2,3].forEach(i=>{document.getElementById('bc'+i).className='bc-num'+(i===1?' on':'');document.getElementById('bcl'+i).className='bc-label'+(i===1?' on':'');});
+  // reset wizard to page 1
+  document.querySelectorAll('.wiz-page').forEach(p=>{p.classList.remove('on','exit-left');p.style.transform='';p.style.opacity='';});
+  document.getElementById('pg1').classList.add('on');
+  currentPage=1;S.wizPage=1;updateWizStrip();updateBar();
+}
+
+function doCart(){const btn=document.getElementById('btn-cart');btn.textContent='Added to Cart ✓';btn.style.background='#2A7A4A';setTimeout(()=>{btn.textContent='Add to Cart →';btn.style.background='';},2400);}
+document.getElementById('modal').addEventListener('click',function(e){if(e.target===this)closeModal();});
+
+// init
+updateWizStrip();
+updateBar();
+</script>
+</body>
+</html>
